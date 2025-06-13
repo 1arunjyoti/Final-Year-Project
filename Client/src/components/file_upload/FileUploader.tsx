@@ -35,6 +35,10 @@ export default function FileUploader() {
         "image/png": [".png"],
         "image/jpeg": [".jpg", ".jpeg"],
     };
+    const [mode, setMode] = useState<"sales" | "inventory">("sales");
+    const [inventoryData, setInventoryData] = useState([
+        { productName: "", unitPrice: "", quantity: "" },
+    ]);
     // Function to validate the file type and size
     function validateFile(file: File): { isValid: boolean; error?: string } {
         const allowedMimeTypes = Object.keys(allowedFileTypes);
@@ -223,9 +227,9 @@ export default function FileUploader() {
                             // Calculate the progress percentage
                             const progress = progressEvent.total
                                 ? Math.round(
-                                      (progressEvent.loaded * 100) /
-                                          progressEvent.total
-                                  )
+                                    (progressEvent.loaded * 100) /
+                                    progressEvent.total
+                                )
                                 : 0;
 
                             setFiles((prev) =>
@@ -243,10 +247,10 @@ export default function FileUploader() {
                     prev.map((f) =>
                         f.file === fileWithStatus.file
                             ? {
-                                  ...f,
-                                  status: "success" as UploadStatus,
-                                  progress: 100,
-                              }
+                                ...f,
+                                status: "success" as UploadStatus,
+                                progress: 100,
+                            }
                             : f
                     )
                 );
@@ -292,10 +296,10 @@ export default function FileUploader() {
                     prev.map((f) =>
                         f.file === fileWithStatus.file
                             ? {
-                                  ...f,
-                                  status: "error" as UploadStatus,
-                                  error: errorMessage,
-                              } // Store the detailed error
+                                ...f,
+                                status: "error" as UploadStatus,
+                                error: errorMessage,
+                            } // Store the detailed error
                             : f
                     )
                 );
@@ -316,163 +320,255 @@ export default function FileUploader() {
                     </h1>
                 </div>
             </section>
+            <div className="flex justify-center space-x-4 my-4">
+                <button
+                    onClick={() => setMode("sales")}
+                    className={`px-4 py-2 rounded ${mode === "sales" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"
+                        }`}
+                >
+                    Sales Receipt
+                </button>
+                <button
+                    onClick={() => setMode("inventory")}
+                    className={`px-4 py-2 rounded ${mode === "inventory" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-800"
+                        }`}
+                >
+                    Inventory
+                </button>
+            </div>
             {/* Main content area */}
-            <main className="flex-shrink flex items-center justify-center py-12">
-                <div className="max-w-md w-full mx-auto p-6 border border-gray-200 rounded-lg shadow-md bg-white space-y-4">
-                    {/* Hidden file input */}
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleFileChange}
-                        className="hidden"
-                        multiple
-                        accept=".png,.jpg,.jpeg" // Updated accept types
-                        capture="environment"
-                    />
+            <main className="flex-shrink flex items-center justify-center py-12" >
+                {mode === "sales" && (
+                    <div className="max-w-md w-full mx-auto p-6 border border-gray-200 rounded-lg shadow-md bg-white space-y-4">
+                        {/* Hidden file input */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                            multiple
+                            accept=".png,.jpg,.jpeg" // Updated accept types
+                            capture="environment"
+                        />
 
-                    {/* Custom file input trigger */}
-                    <div className="relative">
+                        {/* Custom file input trigger */}
+                        <div className="relative">
+                            <button
+                                onClick={triggerFileInput}
+                                className="w-full flex flex-col items-center justify-center px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors duration-200">
+                                <FiUploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+                                <span className="text-sm font-medium text-gray-600">
+                                    {files.length > 0
+                                        ? "Add more files"
+                                        : "Drag and drop your files here"}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                    PNG, JPG, JPEG only (up to 10MB){" "}
+                                    {/* Updated file types text */}
+                                </span>
+                            </button>
+                        </div>
+
+                        {/* Select File Button */}
                         <button
                             onClick={triggerFileInput}
-                            className="w-full flex flex-col items-center justify-center px-4 py-6 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-gray-50 transition-colors duration-200">
-                            <FiUploadCloud className="w-8 h-8 text-gray-400 mb-2" />
-                            <span className="text-sm font-medium text-gray-600">
-                                {files.length > 0
-                                    ? "Add more files"
-                                    : "Drag and drop your files here"}
-                            </span>
-                            <span className="text-xs text-gray-500">
-                                PNG, JPG, JPEG only (up to 10MB){" "}
-                                {/* Updated file types text */}
-                            </span>
+                            className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
+                            Select Files
                         </button>
-                    </div>
 
-                    {/* Select File Button */}
-                    <button
-                        onClick={triggerFileInput}
-                        className="w-full py-2 px-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200">
-                        Select Files
-                    </button>
+                        {/* Instructions for the user */}
+                        <div className="relative">
+                            <ul className="w-full flex flex-col items-center justify-center text-gray-600">
+                                Instructions:
+                                <li className="flex items-center text-center justify-center text-sm text-gray-600">
+                                    1. Make sure that there is enough contrast
+                                    between the image and the background for better
+                                    visibility.
+                                </li>
+                                <li className="flex items-center text-center justify-center text-sm text-gray-600">
+                                    2. Check the ledger generated by the system to
+                                    ensure that the data is accurate and complete
+                                    before committing to the database.
+                                </li>
+                                <li className="flex items-center text-center justify-center text-sm text-gray-600">
+                                    3. Maximum file size is 10MB.
+                                </li>
+                                <li className="flex items-center text-center justify-center text-sm text-gray-600 ">
+                                    4. Supported file types: PNG, JPG, and JPEG.{" "}
+                                    {/* Updated file types text */}
+                                </li>
+                            </ul>
+                        </div>
 
-                    {/* Instructions for the user */}
-                    <div className="relative">
-                        <ul className="w-full flex flex-col items-center justify-center text-gray-600">
-                            Instructions:
-                            <li className="flex items-center text-center justify-center text-sm text-gray-600">
-                                1. Make sure that there is enough contrast
-                                between the image and the background for better
-                                visibility.
-                            </li>
-                            <li className="flex items-center text-center justify-center text-sm text-gray-600">
-                                2. Check the ledger generated by the system to
-                                ensure that the data is accurate and complete
-                                before committing to the database.
-                            </li>
-                            <li className="flex items-center text-center justify-center text-sm text-gray-600">
-                                3. Maximum file size is 10MB.
-                            </li>
-                            <li className="flex items-center text-center justify-center text-sm text-gray-600 ">
-                                4. Supported file types: PNG, JPG, and JPEG.{" "}
-                                {/* Updated file types text */}
-                            </li>
-                        </ul>
-                    </div>
-
-                    {files.length > 0 && (
-                        // Display the list of selected files
-                        <div className="space-y-3">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-sm text-gray-600">
-                                    {files.length} file(s) selected
-                                </span>
-                                <button
-                                    onClick={dismissAllFiles}
-                                    className="text-sm text-red-500 hover:text-red-700 font-medium">
-                                    Cancel All
-                                </button>
-                            </div>
-                            {files.map((fileWithStatus, index) => (
-                                <div
-                                    key={fileWithStatus.file.name + index}
-                                    className={`text-sm border rounded-md p-3 ${
-                                        fileWithStatus.error
+                        {files.length > 0 && (
+                            // Display the list of selected files
+                            <div className="space-y-3">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-sm text-gray-600">
+                                        {files.length} file(s) selected
+                                    </span>
+                                    <button
+                                        onClick={dismissAllFiles}
+                                        className="text-sm text-red-500 hover:text-red-700 font-medium">
+                                        Cancel All
+                                    </button>
+                                </div>
+                                {files.map((fileWithStatus, index) => (
+                                    <div
+                                        key={fileWithStatus.file.name + index}
+                                        className={`text-sm border rounded-md p-3 ${fileWithStatus.error
                                             ? "border-red-200 bg-red-50"
                                             : "border-gray-200 bg-gray-50"
-                                    } relative`}>
-                                    {/* Dismiss button for each file */}
-                                    <button
-                                        onClick={() => dismissFile(index)}
-                                        className="absolute top-2 right-2 text-gray-500 hover:text-red-500">
-                                        <FiX className="w-5 h-5" />
-                                    </button>
-                                    <p className="font-medium text-gray-800 pr-8">
-                                        {fileWithStatus.file.name}
-                                    </p>
-                                    <p className="text-gray-600 text-xs">
-                                        Size:{" "}
-                                        {(
-                                            fileWithStatus.file.size / 1024
-                                        ).toFixed(2)}{" "}
-                                        KB
-                                    </p>
-                                    {fileWithStatus.error && (
-                                        <p className="text-sm text-red-600 mt-1">
-                                            {fileWithStatus.error}
+                                            } relative`}>
+                                        {/* Dismiss button for each file */}
+                                        <button
+                                            onClick={() => dismissFile(index)}
+                                            className="absolute top-2 right-2 text-gray-500 hover:text-red-500">
+                                            <FiX className="w-5 h-5" />
+                                        </button>
+                                        <p className="font-medium text-gray-800 pr-8">
+                                            {fileWithStatus.file.name}
                                         </p>
-                                    )}
-                                    {fileWithStatus.status === "uploading" && (
-                                        <div className="mt-2 space-y-1">
-                                            <div className="h-2 w-full rounded-full bg-gray-200">
-                                                <div
-                                                    className="h-2 rounded-full bg-blue-500 transition-all duration-300 ease-out"
-                                                    style={{
-                                                        width: `${fileWithStatus.progress}%`,
-                                                    }}></div>
-                                            </div>
-                                            <p className="text-xs text-blue-600 text-right">
-                                                {fileWithStatus.progress}%
-                                                uploaded
+                                        <p className="text-gray-600 text-xs">
+                                            Size:{" "}
+                                            {(
+                                                fileWithStatus.file.size / 1024
+                                            ).toFixed(2)}{" "}
+                                            KB
+                                        </p>
+                                        {fileWithStatus.error && (
+                                            <p className="text-sm text-red-600 mt-1">
+                                                {fileWithStatus.error}
                                             </p>
-                                        </div>
-                                    )}
-                                    {fileWithStatus.status === "success" && (
-                                        <p className="text-sm text-green-600 mt-1">
-                                            Upload complete
-                                        </p>
-                                    )}
-                                    {fileWithStatus.status === "error" && (
-                                        <p className="text-sm text-red-600 mt-1">
-                                            Upload failed
-                                        </p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Show button container if files are selected */}
-                    {files.length > 0 &&
-                        files.some((f) => f.status === "idle") && (
-                            <button
-                                onClick={handleFileUpload}
-                                className="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
-                                Upload{" "}
-                                {
-                                    files.filter((f) => f.status === "idle")
-                                        .length
-                                }{" "}
-                                Files
-                            </button>
+                                        )}
+                                        {fileWithStatus.status === "uploading" && (
+                                            <div className="mt-2 space-y-1">
+                                                <div className="h-2 w-full rounded-full bg-gray-200">
+                                                    <div
+                                                        className="h-2 rounded-full bg-blue-500 transition-all duration-300 ease-out"
+                                                        style={{
+                                                            width: `${fileWithStatus.progress}%`,
+                                                        }}></div>
+                                                </div>
+                                                <p className="text-xs text-blue-600 text-right">
+                                                    {fileWithStatus.progress}%
+                                                    uploaded
+                                                </p>
+                                            </div>
+                                        )}
+                                        {fileWithStatus.status === "success" && (
+                                            <p className="text-sm text-green-600 mt-1">
+                                                Upload complete
+                                            </p>
+                                        )}
+                                        {fileWithStatus.status === "error" && (
+                                            <p className="text-sm text-red-600 mt-1">
+                                                Upload failed
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         )}
-                    {tableData && showTable && (
+
+                        {/* Show button container if files are selected */}
+                        {files.length > 0 &&
+                            files.some((f) => f.status === "idle") && (
+                                <button
+                                    onClick={handleFileUpload}
+                                    className="w-full p-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+                                    Upload{" "}
+                                    {
+                                        files.filter((f) => f.status === "idle")
+                                            .length
+                                    }{" "}
+                                    Files
+                                </button>
+                            )}
+                        {tableData && showTable && (
+                            <div className="mb-4 flex items-center gap-x-4">
+                                <input
+                                    type="date"
+                                    value={selectedDate}
+                                    onChange={(e) =>
+                                        setSelectedDate(e.target.value)
+                                    }
+                                    className="border rounded px-2 py-1"
+                                    required
+                                />
+                                <span className="text-gray-700 font-medium">
+                                    User: {user?.name}
+                                </span>
+                            </div>
+                        )}
+                        {/* Displaying the table */}
+                        {tableData && showTable && (
+                            <div className="mt-6">
+                                <div
+                                    className={`transition-all duration-500 ease-in-out ${tableData
+                                        ? "opacity-100 max-h-[500px]"
+                                        : "opacity-0 max-h-0 overflow-hidden"
+                                        }`}>
+                                    <table className="min-w-full border border-gray-300 mb-2">
+                                        <thead>
+                                            <tr>
+                                                {Object.keys(tableData).map(
+                                                    (column) => (
+                                                        <th
+                                                            key={column}
+                                                            className="border px-2 py-1 bg-gray-100 text-xs">
+                                                            {column}
+                                                        </th>
+                                                    )
+                                                )}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {getTableRows().map((row, rowIdx) => (
+                                                <tr key={rowIdx}>
+                                                    {Object.entries(row).map(
+                                                        ([column, value]) => (
+                                                            <td
+                                                                key={column}
+                                                                className="border px-2 py-1">
+                                                                <input
+                                                                    className="w-full border rounded px-1 py-0.5 text-xs"
+                                                                    value={value}
+                                                                    onChange={(e) =>
+                                                                        handleTableEdit(
+                                                                            rowIdx,
+                                                                            column,
+                                                                            e.target
+                                                                                .value
+                                                                        )
+                                                                    }
+                                                                />
+                                                            </td>
+                                                        )
+                                                    )}
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div className="flex justify-end">
+                                    <button
+                                        onClick={handleApprove}
+                                        className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
+                                        Approve
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
+                {mode === "inventory" && (
+                    <div className="space-y-4">
                         <div className="mb-4 flex items-center gap-x-4">
                             <input
                                 type="date"
                                 value={selectedDate}
-                                onChange={(e) =>
-                                    setSelectedDate(e.target.value)
-                                }
+                                onChange={(e) => setSelectedDate(e.target.value)}
                                 className="border rounded px-2 py-1"
                                 required
                             />
@@ -480,68 +576,120 @@ export default function FileUploader() {
                                 User: {user?.name}
                             </span>
                         </div>
-                    )}
-                    {/* Displaying the table */}
-                    {tableData && showTable && (
-                        <div className="mt-6">
-                            <div
-                                className={`transition-all duration-500 ease-in-out ${
-                                    tableData
-                                        ? "opacity-100 max-h-[500px]"
-                                        : "opacity-0 max-h-0 overflow-hidden"
-                                }`}>
-                                <table className="min-w-full border border-gray-300 mb-2">
-                                    <thead>
-                                        <tr>
-                                            {Object.keys(tableData).map(
-                                                (column) => (
-                                                    <th
-                                                        key={column}
-                                                        className="border px-2 py-1 bg-gray-100 text-xs">
-                                                        {column}
-                                                    </th>
-                                                )
-                                            )}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {getTableRows().map((row, rowIdx) => (
-                                            <tr key={rowIdx}>
-                                                {Object.entries(row).map(
-                                                    ([column, value]) => (
-                                                        <td
-                                                            key={column}
-                                                            className="border px-2 py-1">
-                                                            <input
-                                                                className="w-full border rounded px-1 py-0.5 text-xs"
-                                                                value={value}
-                                                                onChange={(e) =>
-                                                                    handleTableEdit(
-                                                                        rowIdx,
-                                                                        column,
-                                                                        e.target
-                                                                            .value
-                                                                    )
-                                                                }
-                                                            />
-                                                        </td>
-                                                    )
-                                                )}
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div className="flex justify-end">
-                                <button
-                                    onClick={handleApprove}
-                                    className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transform hover:scale-105 transition-all duration-200 shadow-md hover:shadow-lg font-medium">
-                                    Approve
-                                </button>
-                            </div>
+
+                        <table className="min-w-full border border-gray-300">
+                            <thead>
+                                <tr>
+                                    <th className="border px-2 py-1 bg-gray-100 text-xs">Product Name</th>
+                                    <th className="border px-2 py-1 bg-gray-100 text-xs">Unit Price</th>
+                                    <th className="border px-2 py-1 bg-gray-100 text-xs">Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {inventoryData.map((row, index) => (
+                                    <tr key={index}>
+                                        <td className="border px-2 py-1">
+                                            <input
+                                                type="text"
+                                                className="w-full border rounded px-1 py-0.5 text-xs"
+                                                value={row.productName}
+                                                onChange={(e) => {
+                                                    const updated = [...inventoryData];
+                                                    updated[index].productName = e.target.value;
+                                                    setInventoryData(updated);
+                                                }}
+                                            />
+                                        </td>
+                                        <td className="border px-2 py-1">
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                className="w-full border rounded px-1 py-0.5 text-xs"
+                                                value={row.unitPrice}
+                                                onChange={(e) => {
+                                                    const updated = [...inventoryData];
+                                                    updated[index].unitPrice = e.target.value;
+                                                    setInventoryData(updated);
+                                                }}
+                                            />
+                                        </td>
+                                        <td className="border px-2 py-1">
+                                            <input
+                                                type="number"
+                                                className="w-full border rounded px-1 py-0.5 text-xs"
+                                                value={row.quantity}
+                                                onChange={(e) => {
+                                                    const updated = [...inventoryData];
+                                                    updated[index].quantity = e.target.value;
+                                                    setInventoryData(updated);
+                                                }}
+                                            />
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+
+                        <div className="flex justify-between mt-2">
+                            <button
+                                onClick={() =>
+                                    setInventoryData((prev) => [
+                                        ...prev,
+                                        { productName: "", unitPrice: "", quantity: "" },
+                                    ])
+                                }
+                                className="px-3 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                            >
+                                + Add More Rows
+                            </button>
+
+                            <button
+                                onClick={async () => {
+                                    if (!user || !selectedDate) {
+                                        toast.error("Date and user required.");
+                                        return;
+                                    }
+
+                                    const isValid = inventoryData.every(
+                                        (row) =>
+                                            row.productName.trim() &&
+                                            !isNaN(Number(row.unitPrice)) &&
+                                            !isNaN(Number(row.quantity))
+                                    );
+
+                                    if (!isValid) {
+                                        toast.error("Please complete all fields correctly.");
+                                        return;
+                                    }
+
+                                    const payload = inventoryData.map((row) => ({
+                                        userId: user.id,
+                                        productName: row.productName.trim(),
+                                        unitPrice: parseFloat(row.unitPrice),
+                                        quantity: parseInt(row.quantity, 10),
+                                        date: selectedDate,
+                                    }));
+
+                                    try {
+                                        await axios.post(
+                                            "http://localhost:5001/api/inventory/store",
+                                            { rows: payload },
+                                            { withCredentials: true }
+                                        );
+                                        toast.success("Inventory data uploaded!");
+                                        setInventoryData([{ productName: "", unitPrice: "", quantity: "" }]);
+                                    } catch (err) {
+                                        toast.error("Failed to upload inventory.");
+                                        console.error(err);
+                                    }
+                                }}
+                                className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                            >
+                                Submit
+                            </button>
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </main>
         </div>
     );
