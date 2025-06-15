@@ -3,9 +3,11 @@ import datetime
 import sys
 import psycopg2
 from psycopg2.extras import execute_values
+from dotenv import load_dotenv
+import os
 
 # Database connection settings - update these to match your environment
-DATABASE_URL = "postgresql://postgres:mainak@localhost:5432/ledger"
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres.evujabwwvgxmasemxjkz:Tony2056*@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres")
 
 # Connect to the database
 try:
@@ -30,73 +32,73 @@ def get_user_ids():
         sys.exit(1)
         
 # If you want to use a fixed user ID for testing
-DEFAULT_USER_ID = 2
+DEFAULT_USER_ID = 1
 
 # Define items and their unit prices (based on the image and expanded)
 items = {
-    # Items from the image
-    "Basmati rice": {"unit": "kg", "price": 180, "unit_options": [1, 2, 5, 10]},
-    "Red lentils": {"unit": "kg", "price": 120, "unit_options": [0.5, 1, 2]},
-    "Mustard oil": {"unit": "L", "price": 160, "unit_options": [0.5, 1, 2, 5]},
-    "Salt": {"unit": "kg", "price": 25, "unit_options": [0.5, 1, 2]},
-    "Atta (Wheat Flour)": {"unit": "kg", "price": 200, "unit_options": [1, 2, 5, 10]},
-    "Sugar": {"unit": "kg", "price": 90, "unit_options": [0.5, 1, 2, 5]},
-    "Turmeric powder": {"unit": "gm", "price": 0.16, "unit_options": [100, 200, 500]},
-    "Tea leaves": {"unit": "gm", "price": 0.6, "unit_options": [100, 250, 500]},
-    "Groundnut oil": {"unit": "L", "price": 200, "unit_options": [0.5, 1, 2, 5]},
-    "Jaggery": {"unit": "gm", "price": 0.12, "unit_options": [250, 500, 1000]},
-    "Red chilli powder": {"unit": "gm", "price": 0.35, "unit_options": [100, 200, 500]},
-    "Cumin seeds": {"unit": "gm", "price": 0.4, "unit_options": [100, 250, 500]},
-    "Black pepper": {"unit": "gm", "price": 1.2, "unit_options": [50, 100, 200]},
-    
-    # Additional Indian grocery items
-    "Coriander powder": {"unit": "gm", "price": 0.3, "unit_options": [100, 200, 500]},
-    "Cardamom": {"unit": "gm", "price": 2.5, "unit_options": [50, 100, 200]},
-    "Cloves": {"unit": "gm", "price": 1.8, "unit_options": [50, 100, 200]},
-    "Green gram": {"unit": "kg", "price": 130, "unit_options": [0.5, 1, 2]},
-    "Chickpeas": {"unit": "kg", "price": 110, "unit_options": [0.5, 1, 2]},
-    "Bay leaves": {"unit": "gm", "price": 0.5, "unit_options": [50, 100, 200]},
-    "Dry red chilli": {"unit": "gm", "price": 0.6, "unit_options": [100, 200, 500]},
-    "Moong dal": {"unit": "kg", "price": 140, "unit_options": [0.5, 1, 2]},
-    "Masoor dal": {"unit": "kg", "price": 115, "unit_options": [0.5, 1, 2]},
-    "Refined oil": {"unit": "L", "price": 150, "unit_options": [0.5, 1, 2, 5]},
-    "Sunflower oil": {"unit": "L", "price": 170, "unit_options": [0.5, 1, 2, 5]},
-    "Besan (Gram Flour)": {"unit": "kg", "price": 100, "unit_options": [0.5, 1, 2]},
-    "Toor dal": {"unit": "kg", "price": 125, "unit_options": [0.5, 1, 2]},
-    "Urad dal": {"unit": "kg", "price": 135, "unit_options": [0.5, 1, 2]},
-    "Poha": {"unit": "kg", "price": 80, "unit_options": [0.5, 1, 2]},
-    "Suji (Semolina)": {"unit": "kg", "price": 60, "unit_options": [0.5, 1, 2]},
-    "Ghee": {"unit": "kg", "price": 550, "unit_options": [0.25, 0.5, 1]},
-    "Coconut oil": {"unit": "L", "price": 220, "unit_options": [0.5, 1]},
-    "Tamarind": {"unit": "gm", "price": 0.2, "unit_options": [100, 250, 500]},
-    "Fennel seeds": {"unit": "gm", "price": 0.5, "unit_options": [100, 200]},
-    "Fenugreek seeds": {"unit": "gm", "price": 0.3, "unit_options": [100, 200]},
-    "Asafoetida": {"unit": "gm", "price": 2.0, "unit_options": [50, 100]},
-    "Cashew nuts": {"unit": "gm", "price": 1.0, "unit_options": [100, 250, 500]},
-    "Almonds": {"unit": "gm", "price": 1.2, "unit_options": [100, 250, 500]},
-    "Raisins": {"unit": "gm", "price": 0.5, "unit_options": [100, 250, 500]},
-    "Peanuts": {"unit": "kg", "price": 160, "unit_options": [0.5, 1]},
-    "Chana dal": {"unit": "kg", "price": 95, "unit_options": [0.5, 1, 2]},
-    "Rajma (Kidney beans)": {"unit": "kg", "price": 140, "unit_options": [0.5, 1]},
-    "Sago": {"unit": "kg", "price": 120, "unit_options": [0.5, 1]},
-    "Vermicelli": {"unit": "kg", "price": 90, "unit_options": [0.5, 1]},
-    "Baking soda": {"unit": "gm", "price": 0.15, "unit_options": [100, 200]},
-    "Baking powder": {"unit": "gm", "price": 0.2, "unit_options": [100, 200]},
-    "Custard powder": {"unit": "gm", "price": 0.3, "unit_options": [100, 200]},
-    "Jelly crystals": {"unit": "gm", "price": 0.25, "unit_options": [100, 200]},
-    "Honey": {"unit": "gm", "price": 0.6, "unit_options": [250, 500]},
-    "Jam": {"unit": "gm", "price": 0.3, "unit_options": [250, 500]},
-    "Pickle": {"unit": "gm", "price": 0.25, "unit_options": [250, 500]},
-    "Papad": {"unit": "gm", "price": 0.4, "unit_options": [100, 200]}
+    "Basmati rice": {"unit": "kg", "price": 75, "unit_options": [0.5, 1, 2, 5, 10, 20]},
+    "Red lentils": {"unit": "kg", "price": 140, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Mustard oil": {"unit": "L", "price": 180, "unit_options": [0.2, 0.5, 1, 2, 5, 10]},
+    "Salt": {"unit": "kg", "price": 25, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Atta": {"unit": "kg", "price": 60, "unit_options": [0.5, 1, 2, 5, 10, 25]},
+    "Maida": {"unit": "kg", "price": 85, "unit_options": [0.5, 1, 2, 5, 10, 25]},
+    "Sugar": {"unit": "kg", "price": 45, "unit_options": [0.25, 0.5, 1, 2, 5, 10]},
+    "Turmeric powder": {"unit": "gm", "price": 0.25, "unit_options": [50, 100, 200, 500, 1000]},
+    "Tea leaves": {"unit": "gm", "price": 0.5, "unit_options": [50, 100, 250, 500, 1000]},
+    "Groundnut oil": {"unit": "L", "price": 210, "unit_options": [0.2, 0.5, 1, 2, 5, 10]},
+    "Jaggery": {"unit": "gm", "price": 0.09, "unit_options": [100, 250, 500, 1000, 2000]},
+    "Red chilli powder": {"unit": "gm", "price": 0.4, "unit_options": [50, 100, 200, 500, 1000]},
+    "Cumin seeds": {"unit": "gm", "price": 0.18, "unit_options": [50, 100, 250, 500, 1000]},
+    "Black pepper": {"unit": "gm", "price": 0.75, "unit_options": [25, 50, 100, 200, 500]},
+    "Coriander powder": {"unit": "gm", "price": 0.16, "unit_options": [50, 100, 200, 500, 1000]},
+    "Cardamom": {"unit": "gm", "price": 2.5, "unit_options": [10, 25, 50, 100, 200]},
+    "Cloves": {"unit": "gm", "price": 0.9, "unit_options": [10, 25, 50, 100, 200]},
+    "Green gram": {"unit": "kg", "price": 120, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Chickpeas": {"unit": "kg", "price": 70, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Bay leaves": {"unit": "gm", "price": 0.6, "unit_options": [25, 50, 100, 200, 500]},
+    "Dry red chilli": {"unit": "gm", "price": 0.2, "unit_options": [50, 100, 200, 500, 1000]},
+    "Moong dal": {"unit": "kg", "price": 150, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Masoor dal": {"unit": "kg", "price": 130, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Refined oil": {"unit": "L", "price": 145, "unit_options": [0.2, 0.5, 1, 2, 5, 10]},
+    "Sunflower oil": {"unit": "L", "price": 160, "unit_options": [0.2, 0.5, 1, 2, 5, 10]},
+    "Besan": {"unit": "kg", "price": 95, "unit_options": [0.5, 1, 2, 5, 10]},
+    "Toor dal": {"unit": "kg", "price": 135, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Urad dal": {"unit": "kg", "price": 145, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Poha": {"unit": "kg", "price": 70, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Sooji": {"unit": "kg", "price": 55, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Ghee": {"unit": "kg", "price": 600, "unit_options": [0.1, 0.25, 0.5, 1, 2]},
+    "Coconut oil": {"unit": "L", "price": 210, "unit_options": [0.2, 0.5, 1, 2]},
+    "Tamarind": {"unit": "gm", "price": 0.22, "unit_options": [50, 100, 250, 500, 1000]},
+    "Fennel seeds": {"unit": "gm", "price": 0.25, "unit_options": [50, 100, 200, 500]},
+    "Fenugreek seeds": {"unit": "gm", "price": 0.1, "unit_options": [50, 100, 200, 500]},
+    "Asafoetida": {"unit": "gm", "price": 2.5, "unit_options": [25, 50, 100, 200]},
+    "Cashew nuts": {"unit": "gm", "price": 0.8, "unit_options": [50, 100, 250, 500, 1000]},
+    "Almonds": {"unit": "gm", "price": 0.9, "unit_options": [50, 100, 250, 500, 1000]},
+    "Raisins": {"unit": "gm", "price": 0.45, "unit_options": [50, 100, 250, 500, 1000]},
+    "Peanuts": {"unit": "kg", "price": 150, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Chana dal": {"unit": "kg", "price": 105, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Rajma": {"unit": "kg", "price": 150, "unit_options": [0.25, 0.5, 1, 2, 5]},
+    "Sago": {"unit": "kg", "price": 110, "unit_options": [0.25, 0.5, 1, 2]},
+    "Vermicelli": {"unit": "kg", "price": 85, "unit_options": [0.25, 0.5, 1, 2]},
+    "Baking soda": {"unit": "gm", "price": 0.1, "unit_options": [50, 100, 200, 500]},
+    "Baking powder": {"unit": "gm", "price": 0.2, "unit_options": [50, 100, 200, 500]},
+    "Custard powder": {"unit": "gm", "price": 0.35, "unit_options": [50, 100, 200, 500]},
+    "Jelly crystals": {"unit": "gm", "price": 0.28, "unit_options": [50, 100, 200, 500]},
+    "Honey": {"unit": "gm", "price": 0.7, "unit_options": [100, 250, 500, 1000]},
+    "Jam": {"unit": "gm", "price": 0.3, "unit_options": [100, 250, 500, 1000]},
+    "Pickle": {"unit": "gm", "price": 0.25, "unit_options": [100, 250, 500, 1000]},
+    "Papad": {"unit": "gm", "price": 0.4, "unit_options": [50, 100, 200, 500]}
 }
 
 # Generate a date within the last 2 months
-def generate_date():
+def generate_date(order_id, total_orders):
     end_date = datetime.datetime.now()
-    start_date = end_date - datetime.timedelta(days=60)  # 2 months period
+    start_date = end_date - datetime.timedelta(days=730)  # 2 years period
     days_between = (end_date - start_date).days
-    random_days = random.randint(0, days_between)
-    return (start_date + datetime.timedelta(days=random_days)).strftime("%Y-%m-%d")
+    date_position = (int(order_id) - 1) / total_orders
+    days_to_add = int(days_between * date_position)
+
+    return (start_date + datetime.timedelta(days=days_to_add)).strftime("%Y-%m-%d")
 
 # Format quantity string based on unit and value
 def format_quantity(quantity, unit):
@@ -115,11 +117,13 @@ def generate_transactions(num_transactions=300):
     transactions = []
     current_id = 1
     order_count = 0
+
+    estimated_orders = num_transactions // 4.5
     
     while len(transactions) < num_transactions:
         # Generate a new order with 2-7 items
         order_id = f"{order_count + 1}"  # Simple sequential order IDs
-        order_date = generate_date()
+        order_date = generate_date(order_id, estimated_orders)
         order_items_count = random.randint(2, 7)  # 2-7 items per order
         
         # Create a timestamp for this order
