@@ -5,6 +5,7 @@ import cors from 'cors';
 import { sequelize } from '../models';
 import authRoutes from './routes/authRoutes';
 import transactionRoutes from './routes/transactionRoutes';
+import inventoryRoutes from './routes/inventoryRoutes';
 import cookieParser from 'cookie-parser';
 
 const app: Express = express();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Test Database Connection using the imported sequelize instance
 const checkDbConnection = async () => {
