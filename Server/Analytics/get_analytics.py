@@ -20,7 +20,7 @@ def get_key_metrics(transactions_df):
     transactions_df['date'] = pd.to_datetime(transactions_df['date'])
 
     # Add revenue column
-    transactions_df['revenue'] = transactions_df['quantity'] * transactions_df['sellingPrice']
+    # transactions_df['revenue'] = transactions_df['quantity'] * transactions_df['sellingPrice']
 
     # Reference end date as latest transaction
     end_date = transactions_df['date'].max()
@@ -38,7 +38,7 @@ def get_key_metrics(transactions_df):
     for label, start_date in periods.items():
         period_tx = transactions_df[(transactions_df['date'] >= start_date) & (transactions_df['date'] <= end_date)]
         
-        total_revenue = period_tx['revenue'].sum()
+        total_revenue = period_tx['sellingPrice'].sum()
         order_count = period_tx['id'].nunique() if 'id' in period_tx.columns else len(period_tx)
         avg_order_value = total_revenue / order_count if order_count else 0
 
@@ -161,3 +161,81 @@ def get_inventory_insights(transactions_df, inventories_df, products_df):
     output_json = final_df.to_dict(orient='records')
     print(json.dumps(output_json, indent=2))
     return output_json
+
+def get_top_selling_items(transactions_df, products_df):
+    # Group by productID and sum revenue
+    top_selling = transactions_df.groupby('productID')['sellingPrice'].sum().reset_index()
+
+    # Optionally, merge with product names if available
+    top_selling = top_selling.merge(products_df[['productID', 'productName']], on='productID', how='left')
+
+    # Sort descending by revenue
+    top_selling = top_selling.sort_values(by='sellingPrice', ascending=False)
+
+    # Optional: round and convert to JSON
+    top_selling['sellingPrice'] = top_selling['sellingPrice'].round(2)
+    top_selling_json = top_selling.to_dict(orient='records')
+    return top_selling_json
+
+def get_stock_records(transactions_df, inventories_df, products_df):
+    # Step 1: Calculate total purchased (bought) quantity per product
+    bought = inventories_df.groupby('productID')['holdingQuantity'].sum().reset_index()
+    bought.columns = ['productID', 'bought_qty']
+
+    # Step 2: Calculate total sold quantity per product
+    sold = transactions_df.groupby('productID')['quantity'].sum().reset_index()
+    sold.columns = ['productID', 'sold_qty']
+
+    # Step 3: Merge both and compute current stock
+    stock_df = bought.merge(sold, on='productID', how='left')
+    stock_df['sold_qty'] = stock_df['sold_qty'].fillna(0)
+    stock_df['current_stock'] = stock_df['bought_qty'] - stock_df['sold_qty']
+
+    # Step 4: Add product name (optional)
+    stock_df = stock_df.merge(products_df[['productID', 'productName']], on='productID', how='left')
+
+    # Step 5: Sort by current stock in ascending order
+    stock_df = stock_df.sort_values(by='current_stock', ascending=True)
+
+    # Step 4: Merge with unit prices from inventories_df (assuming unit price is constant per product)
+    unit_prices = inventories_df[['productID', 'unitPrice']].drop_duplicates('productID')
+    stock_df = stock_df.merge(unit_prices, on='productID', how='left')
+
+    # Step 5: Calculate inventory value per product
+    stock_df['inventory_value'] = stock_df['current_stock'] * stock_df['unitPrice']
+
+    # Step 6: Sum total inventory value
+    total_inventory_value = stock_df['inventory_value'].sum().round(2)
+
+    # Optional: Final formatting
+    stock_df = stock_df[['productID', 'productName', 'current_stock']]
+    stock_df['current_stock'] = stock_df['current_stock'].round(0).astype('Int64')
+
+    # Convert to JSON
+    stock_json = stock_df.to_dict(orient='records')
+    return stock_json, total_inventory_value
+
+def get_total_inventory(inventories_df):
+
+    # Make sure stockingDate is in datetime format
+    inventories_df['stockingDate'] = pd.to_datetime(inventories_df['stockingDate'])
+
+    # Filter to last 30 days
+    end_date = inventories_df['stockingDate'].max()  # or datetime.today()
+    start_date = end_date - timedelta(days=30)
+
+    last_30_days_inventory = inventories_df[
+        (inventories_df['stockingDate'] >= start_date) &
+        (inventories_df['stockingDate'] <= end_date)
+    ].copy()
+
+    # Calculate value of each stock entry
+    last_30_days_inventory['value'] = last_30_days_inventory['holdingQuantity'] * last_30_days_inventory['unitPrice']
+
+    # Sum total inventory value
+    total_inventory_value_30d = last_30_days_inventory['value'].sum()
+
+    # Round if needed
+    total_inventory_value_30d = round(total_inventory_value_30d, 2)
+
+    return total_inventory_value_30d
