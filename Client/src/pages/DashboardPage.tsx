@@ -3,18 +3,15 @@ import { Link } from 'react-router-dom';
 
 import { 
   BarChart2, 
-  Bookmark, 
   ChevronRight, 
   Download, 
   Package, 
   ShoppingBag, 
-  TrendingUp, 
-  Users } from 'lucide-react';
+  TrendingUp } from 'lucide-react';
 import Navbar from '../components/layout/Navbar';
 import Footer from '../components/layout/Footer';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 import Button from '../components/ui/Button';
-import Badge from '../components/ui/Badge';
 import { AnalyticsSummary, PredictionSummary } from '../types';
 import { useAuth } from '../context/AuthContext';
 
@@ -105,7 +102,7 @@ const DashboardPage: React.FC = () => {
               </Link>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-blue-800">Total Sales</p>
@@ -129,47 +126,18 @@ const DashboardPage: React.FC = () => {
                   </div>
                   <p className="text-2xl font-bold text-amber-900 mt-2">{formatCurrency(analyticsSummary.totalPurchases)}</p>
                 </div>
-                
-                <div className="bg-indigo-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-indigo-800">Active Customers</p>
-                    <Users className="h-5 w-5 text-indigo-800" />
-                  </div>
-                  <p className="text-2xl font-bold text-indigo-900 mt-2">{analyticsSummary.customerCount}</p>
-                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Top Selling Items</h3>
-                  <div className="space-y-4">
-                    {analyticsSummary.topSellingItems.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <p className="font-medium">{item.name}</p>
-                          <p className="text-sm text-gray-500">{item.quantity} units sold</p>
-                        </div>
-                        <p className="font-medium">{formatCurrency(item.revenue)}</p>
+              <div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Top Selling Items</h3>
+                <div className="space-y-4">
+                  {analyticsSummary.topSellingItems.map((item, index) => (                      <div key={index} className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <p className="font-medium">{item.name}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Recent Transactions</h3>
-                  <div className="space-y-4">
-                    {analyticsSummary.recentTransactions.map(transaction => (
-                      <div key={transaction.id} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <p className="font-medium">{transaction.description}</p>
-                          <p className="text-sm text-gray-500">{transaction.date}</p>
-                        </div>
-                        <p className={`font-medium ${transaction.type === 'credit' ? 'text-green-600' : 'text-red-600'}`}>
-                          {transaction.type === 'credit' ? '+' : '-'}{formatCurrency(transaction.amount)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                      <p className="font-medium">{formatCurrency(item.revenue)}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
@@ -198,8 +166,7 @@ const DashboardPage: React.FC = () => {
                 </Button>
               </Link>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <CardContent>              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="bg-emerald-50 p-4 rounded-lg">
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium text-emerald-800">Sales Forecast</p>
@@ -208,17 +175,6 @@ const DashboardPage: React.FC = () => {
                   <p className="text-2xl font-bold text-emerald-900 mt-2">{formatCurrency(predictionSummary.salesForecast)}</p>
                   <p className="text-sm text-emerald-800 mt-1">
                     {predictionSummary.growthRate > 0 ? '+' : ''}{predictionSummary.growthRate}% from last month
-                  </p>
-                </div>
-                
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-blue-800">Potential Savings</p>
-                    <Bookmark className="h-5 w-5 text-blue-800" />
-                  </div>
-                  <p className="text-2xl font-bold text-blue-900 mt-2">{formatCurrency(predictionSummary.potentialSavings)}</p>
-                  <p className="text-sm text-blue-800 mt-1">
-                    With inventory optimization
                   </p>
                 </div>
                 
@@ -233,63 +189,30 @@ const DashboardPage: React.FC = () => {
                   </p>
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Inventory Recommendations</h3>
-                  <div className="space-y-4">
-                    {predictionSummary.inventoryRecommendations.map((item, index) => (
-                      <div key={index} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <p className="font-medium">{item.item}</p>
-                          <p className="text-sm text-gray-500">Current: {item.currentStock} units</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">Recommended: {item.recommendedStock}</p>
-                          <p className="text-sm text-emerald-600">
-                            +{item.recommendedStock - item.currentStock} units needed
-                          </p>
-                        </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-3">Inventory Recommendations</h3>
+                <div className="space-y-4">
+                  {predictionSummary.inventoryRecommendations.map((item, index) => (
+                    <div key={index} className="flex justify-between items-center border-b pb-2">
+                      <div>
+                        <p className="font-medium">{item.item}</p>
+                        <p className="text-sm text-gray-500">Current: {item.currentStock} units</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">Seasonal Trends</h3>
-                  <div className="space-y-4">
-                    {predictionSummary.seasonalTrends.map((trend, index) => (
-                      <div key={index} className="flex justify-between items-center border-b pb-2">
-                        <div>
-                          <p className="font-medium">{trend.season}</p>
-                          <div className="flex items-center">
-                            <Badge 
-                              variant={
-                                trend.performance === 'high' ? 'success' : 
-                                trend.performance === 'medium' ? 'warning' : 'error'
-                              }
-                              size="sm"
-                            >
-                              {trend.performance}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">
-                            {trend.projectedChange > 0 ? '+' : ''}{trend.projectedChange}%
-                          </p>
-                          <p className="text-sm text-gray-500">Projected change</p>
-                        </div>
+                      <div className="text-right">
+                        <p className="font-medium">Recommended: {item.recommendedStock}</p>
+                        <p className="text-sm text-emerald-600">
+                          +{item.recommendedStock - item.currentStock} units needed
+                        </p>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </CardContent>
             <CardFooter className="bg-gray-50 justify-between">
               <div className="flex items-center text-sm text-gray-600">
                 <BarChart2 className="h-4 w-4 mr-1 text-blue-800" />
-                Based on 3 years of historical data
+                Based on 2 years of historical data
               </div>
               <p className="text-sm text-gray-500">Last updated: Today</p>
             </CardFooter>

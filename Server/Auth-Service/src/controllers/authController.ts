@@ -178,4 +178,3 @@ export const updateMe: AsyncHandler = async (req, res, next) => {
     res.status(200).json({ status: 'success', message: 'Logged out successfully' });
   };
   
-  // ... existing code ...

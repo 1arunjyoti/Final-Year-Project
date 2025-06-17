@@ -663,11 +663,11 @@ export default function FileUploader() {
                                     }
 
                                     const payload = inventoryData.map((row) => ({
-                                        userId: user.id,
+                                        UserId: user.id,
                                         productName: row.productName.trim(),
                                         unitPrice: parseFloat(row.unitPrice),
-                                        quantity: parseInt(row.quantity, 10),
-                                        date: selectedDate,
+                                        holdingQuantity: parseInt(row.quantity, 10),
+                                        stockingDate: selectedDate,
                                     }));
 
                                     try {
