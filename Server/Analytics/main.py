@@ -1,17 +1,28 @@
-# Server/main.py
-from fastapi import FastAPI
-from Analytics.routes.analytics_routes import router as analytics_router
-# Import other routers as needed
-# from Auth-Service.routes.auth_routes import router as auth_router
+from flask import Flask, request, jsonify, Response
+from flask_cors import CORS 
+import numpy as np
+import pandas as pd
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)
 
-# Include routers
-app.include_router(analytics_router, prefix="/analytics")
-# app.include_router(auth_router, prefix="/auth")
+@app.route('/analytics', methods=['POST'])
+def get_analytics():
+    try:
+        data = request.json
+    except Exception as e:
+        print("Error retrieving analytics:", e)
+        return jsonify({"error": "An error occurred while processing the analytics"}), 500
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to LedgerSense API"}
+@app.route('/predictions', methods=['POST'])
+def get_predictions():
+    try:
+        data = request.json
+    except Exception as e:
+        print("Error retrieving predictions:", e)
+        return jsonify({"error": "An error occurred while processing the predictions"}), 500
 
-# You can run this via: uvicorn main:app --reload
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5004))
+    app.run(host='0.0.0.0', port=port, debug=True)
