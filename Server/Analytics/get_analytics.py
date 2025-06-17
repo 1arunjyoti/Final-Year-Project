@@ -48,10 +48,9 @@ def get_key_metrics(transactions_df):
         }
 
     # Final JSON object
-    output = {'key_metrics': key_metrics}
-    json_output = json.dumps(output, indent=2)
+    json_output = json.dumps(key_metrics, indent=2)
     print(json_output)
-    return output
+    return key_metrics
 
 
 def get_monthly_sales(transactions_df, inventories_df):

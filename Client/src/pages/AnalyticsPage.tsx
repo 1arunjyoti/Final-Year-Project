@@ -19,6 +19,7 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+import { useEffect, useState } from "react";
 // import {Pie} from 'react-chartjs-2';
 
 ChartJS.register(
@@ -30,43 +31,83 @@ ChartJS.register(
   Legend
 );
 
+type KeyMetricsPeriod = {
+  averageOrderValue: number;
+  totalRevenue: number;
+};
+
+type KeyMetrics = {
+  "30_days": KeyMetricsPeriod;
+  "6_months": KeyMetricsPeriod;
+  quarter: KeyMetricsPeriod;
+};
 // Define types for the analytics data
 type MonthlySales = { month: string; sales: number; profit: number };
-type InventoryItem = {
-  name: string;
+type InventoryInsight = {
+  daysOnHand: number;
+  productID: number;
+  productName: string;
   stock: number;
   turnoverRate: number;
-  daysOnHand: number;
+};
+type AnalyticsResponse = {
+  inventory_insights: InventoryInsight[];
+  key_metrics: KeyMetrics;
+  monthly_sales: MonthlySales[];
 };
 
 // Mock data
-const keyMetrics = {
-  totalRevenue: 1961886,
-  averageOrderValue: 878,
-};
+// const keyMetrics = {
+//   totalRevenue: 1961886,
+//   averageOrderValue: 878,
+// };
 
-const monthlySalesData: MonthlySales[] = [
-  { month: "Jan", sales: 300841, profit: 60168 },
-  { month: "Feb", sales: 274190, profit: 54838 },
-  { month: "Mar", sales: 320548, profit: 64109 },
-  { month: "Apr", sales: 296525, profit: 59305 },
-  { month: "May", sales: 336685, profit: 67337 },
-  { month: "Jun", sales: 116621, profit: 23324 },
-];
+// const monthlySalesData: MonthlySales[] = [
+//   { month: "Jan", sales: 300841, profit: 60168 },
+//   { month: "Feb", sales: 274190, profit: 54838 },
+//   { month: "Mar", sales: 320548, profit: 64109 },
+//   { month: "Apr", sales: 296525, profit: 59305 },
+//   { month: "May", sales: 336685, profit: 67337 },
+//   { month: "Jun", sales: 116621, profit: 23324 },
+// ];
 
-const inventoryPerformanceData: InventoryItem[] = [
-  { name: "Rice", stock: 45, turnoverRate: 5.2, daysOnHand: 15 },
-  { name: "Mustard Oil", stock: 30, turnoverRate: 6.8, daysOnHand: 10 },
-  {
-    name: "Atta (Wheat Flour)",
-    stock: 20,
-    turnoverRate: 4.1,
-    daysOnHand: 20,
-  },
-  { name: "Sugar", stock: 60, turnoverRate: 7.5, daysOnHand: 8 },
-];
+// const inventoryPerformanceData: InventoryItem[] = [
+//   { name: "Rice", stock: 45, turnoverRate: 5.2, daysOnHand: 15 },
+//   { name: "Mustard Oil", stock: 30, turnoverRate: 6.8, daysOnHand: 10 },
+//   {
+//     name: "Atta (Wheat Flour)",
+//     stock: 20,
+//     turnoverRate: 4.1,
+//     daysOnHand: 20,
+//   },
+//   { name: "Sugar", stock: 60, turnoverRate: 7.5, daysOnHand: 8 },
+// ];
 
 const AnalyticsPage: React.FC = () => {
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsResponse | null>(
+    null
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5004/analytics");
+        if (!response.ok) {
+          throw new Error("Failed to fetch analytics data");
+        }
+        const data = await response.json();
+        setAnalyticsData(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, []);
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
@@ -74,6 +115,33 @@ const AnalyticsPage: React.FC = () => {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const keyMetrics = analyticsData?.key_metrics["6_months"] || {
+    totalRevenue: 0,
+    averageOrderValue: 0,
+  };
+
+  const monthlySalesData = analyticsData?.monthly_sales.slice(0, 6) || [];
+
+  const inventoryPerformanceData =
+    analyticsData?.inventory_insights.slice(0, 5) || [];
+
+  // Add loading and error states
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        Loading...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
 
   const salesChartData = {
     labels: monthlySalesData.map((item) => item.month),
@@ -224,15 +292,15 @@ const AnalyticsPage: React.FC = () => {
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {inventoryPerformanceData.map((item) => (
-                        <tr key={item.name}>
+                        <tr key={item.productID}>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {item.name}
+                            {item.productName}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.stock} units
+                            {item.stock} kg/L
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {item.turnoverRate.toFixed(1)}
+                            {item.turnoverRate.toFixed(2)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {item.daysOnHand} days

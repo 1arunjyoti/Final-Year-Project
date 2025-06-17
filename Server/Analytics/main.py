@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/analytics', methods=['POST'])
+@app.route('/analytics', methods=['GET'])
 def get_analytics():
     try:
         url = os.getenv('DATABASE_URL')

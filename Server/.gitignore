@@ -40,6 +40,8 @@ ocr_service
 .ocr_service
 analytics_service
 .analytics_service
+venv
+.venv
 *.pyc
 __pycache__/
 *.pyo\
