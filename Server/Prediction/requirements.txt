@@ -1,0 +1,9 @@
+Flask
+SQLAlchemy
+psycopg2-binary
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+statsmodels
