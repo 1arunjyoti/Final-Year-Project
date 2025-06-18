@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 from dotenv import load_dotenv
 from get_analytics import engine_creator, get_df, get_key_metrics, get_monthly_sales, get_inventory_insights, get_stock_records, get_top_selling_items, get_total_inventory
+from get_predictions import get_connection, get_transaction_data, forecast_sales, visualize
 
 load_dotenv()
 
@@ -52,14 +53,14 @@ def get_dashboard():
     #     print("Error retrieving analytics:", e)
     #     return jsonify({"error": "An error occurred while processing the analytics"}), 500
 
-@app.route('/predictions', methods=['POST'])
-def get_predictions():
-    try:
-        data = request.json
-    except Exception as e:
-        print("Error retrieving predictions:", e)
-        return jsonify({"error": "An error occurred while processing the predictions"}), 500
-
+@app.route('/predictions', methods=['GET'])
+def get_forecast():
+    url = os.getenv('DATABASE_URL')
+    conn = get_connection(url)
+    df = get_transaction_data(conn)
+    # visualize(df)
+    result = forecast_sales(df)
+    return jsonify(result)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5004))

@@ -1,8 +1,15 @@
 import pandas as pd
 import numpy as np
-from sqlalchemy import text
+from sqlalchemy import create_engine, text
 from datetime import timedelta
+from sqlalchemy.orm import sessionmaker
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
+
+
+def get_connection(url):
+    engine = create_engine(url)
+    Session = sessionmaker(bind=engine)
+    return engine.connect()
 
 def get_transaction_data(engine):
     query = """

@@ -8,6 +8,6 @@ routes = Blueprint('routes', __name__)
 def get_forecast():
     conn = get_connection()
     df = get_transaction_data(conn)
-    visualize(df)
+    # visualize(df)
     result = forecast_sales(df)
     return jsonify(result)
