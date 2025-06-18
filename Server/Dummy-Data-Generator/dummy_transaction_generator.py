@@ -1,4 +1,3 @@
-from itertools import product
 import random
 import datetime
 import sys
